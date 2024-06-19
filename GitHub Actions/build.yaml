@@ -1,0 +1,53 @@
+name: Build Images
+run-name: Build and push images
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-backend:
+    name: Build backend image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses:  docker/metadata-action@v5
+        with:
+          images: denprokopev9/test-back #указываем репу в которую будет запушен образ (если репы не существует, то она будет создана)
+      - name: Build and push docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: backend #указываем где хранится докерфаил
+          push: true
+          tags: denprokopev9/test-back:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-front:
+    #needs: [build-backend]
+    name: Build front image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+      - name: extract meta for docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: denprokopev9/test-front
+      - name: Builed and push docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: frontend
+          push: true
+          tags: denprokopev9/test-front:latest
+          labels: ${{steps.meta.outcome.labels}}
+          
+                
