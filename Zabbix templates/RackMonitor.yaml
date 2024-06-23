@@ -1,0 +1,123 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 8c880fe54cae471fa97132f8c5e82297
+      name: Cooling
+  templates:
+    - uuid: 3c0feda517f440a98fc58e6db6a51bee
+      template: RackMonitor
+      name: RackMonitor
+      groups:
+        - name: Cooling
+      items:
+        - uuid: 9f989ca3aff04cc7991366b06e67873c
+          name: 'Firmware version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: firmware.version
+          delay: 1d
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+        - uuid: f87fe9c6d3144506996be2965cd28020
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          delay: 5m
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'ICMP ping'
+          triggers:
+            - uuid: 2db6d8e922c847cea0b77d4d7badddc2
+              expression: 'max(/RackMonitor/icmpping,#3)=0'
+              name: 'Unavailable by ICMP ping'
+              priority: HIGH
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              manual_close: 'YES'
+        - uuid: c7ad5bf39c8444e1b5ac6f6aed46bc28
+          name: Uptime
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: sys.uptime
+          delay: 1h
+          history: 30d
+          trends: '0'
+          units: uptime
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          triggers:
+            - uuid: 6bf891dc29f440fc9d06dad8696d53ff
+              expression: last(/RackMonitor/sys.uptime)<10m
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: last(/RackMonitor/sys.uptime)>10m
+              name: 'Host has been restarted'
+              priority: WARNING
+              manual_close: 'YES'
+      discovery_rules:
+        - uuid: 42dfa4641df14bbd9cafbb065a307401
+          name: 'Humidity dicovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#HUMSENSORNAME},1.3.6.1.4.1.52674.500.4.1.2.1.4,{#HUMSENSORVALUE},1.3.6.1.4.1.52674.500.4.1.2.1.2]'
+          key: hum.sensors
+          delay: 3m
+          lifetime: 90d
+          item_prototypes:
+            - uuid: c7eef01696eb4567b8224055bd2845a9
+              name: 'Humidity on {#HUMSENSORNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.52674.500.4.1.2.1.2.{#SNMPINDEX}'
+              key: 'humsensors[humsens.{#SNMPINDEX}]'
+              delay: 3m
+              units: '% RH'
+              trigger_prototypes:
+                - uuid: c450a360cc894392a36707a2e641ab6e
+                  expression: 'last(/RackMonitor/humsensors[humsens.{#SNMPINDEX}])>75'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/RackMonitor/humsensors[humsens.{#SNMPINDEX}])<65'
+                  name: 'Humidity is HIGH: on {#HUMSENSORNAME} - {#HUMSENSORVALUE}% RH'
+                  priority: HIGH
+                - uuid: 1a8330d754b8498c861fbce6964c7ad3
+                  expression: 'last(/RackMonitor/humsensors[humsens.{#SNMPINDEX}])<25'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/RackMonitor/humsensors[humsens.{#SNMPINDEX}])>30'
+                  name: 'Humidity is LOW: on {#HUMSENSORNAME} - {#HUMSENSORVALUE}% RH'
+                  priority: HIGH
+        - uuid: bd893497c54347aa8c6d4747a161c59f
+          name: 'Tempreture sensors discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SENSORNAME},1.3.6.1.4.1.52674.500.4.1.1.1.4,{#SENSORVALUE},1.3.6.1.4.1.52674.500.4.1.1.1.8]'
+          key: temp.discovery
+          delay: 3m
+          lifetime: 90d
+          item_prototypes:
+            - uuid: c9fd4ac617be4541a471916d2211f283
+              name: 'sensor {#SENSORNAME}'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.52674.500.4.1.1.1.8.{#SNMPINDEX}'
+              key: 'sensors[sens.{#SNMPINDEX}]'
+              delay: 3m
+              units: C
+              trigger_prototypes:
+                - uuid: 231e2440f673432d9231aefe7a9d76c2
+                  expression: 'last(/RackMonitor/sensors[sens.{#SNMPINDEX}])>25'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/RackMonitor/sensors[sens.{#SNMPINDEX}])<23'
+                  name: 'Temperature is HIGH: {#SENSORNAME} - {#SENSORVALUE} C'
+                  priority: HIGH
+                - uuid: 4575a9f6fce64d479faeccf390cd6dce
+                  expression: 'last(/RackMonitor/sensors[sens.{#SNMPINDEX}])<12'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/RackMonitor/sensors[sens.{#SNMPINDEX}])>15'
+                  name: 'Temperature is LOW: {#SENSORNAME} - {#SENSORVALUE} C'
+                  priority: HIGH
+      valuemaps:
+        - uuid: 0dc673a1dc874cdfa3838ba609a62057
+          name: 'ICMP ping'
+          mappings:
+            - value: '1'
+              newvalue: availiable
+            - value: '2'
+              newvalue: 'not availiable'

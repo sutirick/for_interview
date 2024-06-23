@@ -1,0 +1,501 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: c4c6a7a2a5844307b6e3e17f6f767a34
+      template: 'Ruijie S6120 in VSU mode'
+      name: 'Ruijie S6120 in VSU mode'
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: 359e9a4efe9d4ca5aceb0bb70e7aad33
+          name: FirmwareVersion
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.0.1.1.10.2.1.1.2.0
+          key: firmware.version
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 0af4cd25240d40b3b1d2249e21a084bb
+          name: HOSTNAME
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.5.0
+          key: hostname
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: da75487997ed428892cdaf4a51140a14
+          name: 'ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[,4]'
+          delay: 3m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: c2db37316530425c93ecf063fadff588
+              expression: 'min(/Ruijie S6120 in VSU mode/icmppingloss[,4],5m)>{$ICMP_LOSS_WARN} and min(/Ruijie S6120 in VSU mode/icmppingloss[,4],5m)<100'
+              name: 'High ICMP ping loss'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+        - uuid: b864ceb96a784f5c9266a82043351dc0
+          name: 'ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[,4]'
+          delay: 3m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 30be9313ce20459093c40bf6dd54fd65
+              expression: 'avg(/Ruijie S6120 in VSU mode/icmppingsec[,4],5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'High ICMP ping response time'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+        - uuid: 5b3e71bf60a84bcaba04a652d00b1aab
+          name: 'ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[,4]'
+          delay: 3m
+          history: 7d
+          trends: 180d
+          valuemap:
+            name: Service
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 683c59f1a7b94beba0f852c99fb728ee
+          name: 'Switch tempreture (master)'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.0.1.1.10.2.1.1.44.1.5.1.0.3
+          key: sw.temp.master
+          delay: 3m
+          history: 7d
+          trends: 180d
+          units: C
+          tags:
+            - tag: component
+              value: health
+        - uuid: 049f4d0658ab454bb130123b8aaaa7bb
+          name: 'Switch tempreture (slave)'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.0.1.1.10.2.1.1.44.1.5.2.0.3
+          key: sw.temp.slave
+          delay: 3m
+          history: 7d
+          trends: 180d
+          units: C
+          tags:
+            - tag: component
+              value: health
+        - uuid: c7087f7942a64da8b489da1d8adc3a6c
+          name: SYS.DESCRIPTION
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.1.0
+          key: sys.desc
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 3f0fab65c82e444ca97e560452ffb2e3
+          name: 'Hardware serial number (master)'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.47.1.1.1.1.11.1
+          key: system.hw.serialnumber.master
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 706173b3e0694f29bfba0f8dc90720a2
+          name: 'Hardware serial number (slave)'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.47.1.1.1.1.11.107
+          key: system.hw.serialnumber.slave
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+        - uuid: c9793ecd45bd4896934efd5b62815df9
+          name: UPTIME
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          delay: 1h
+          history: 7d
+          trends: '0'
+          units: uptime
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: system
+            - tag: component
+              value: UPTIME
+      discovery_rules:
+        - uuid: fccafa80a4524262a5d8638a2d852a43
+          name: Interfaces
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8,{#IFADMINSTATUS},1.3.6.1.2.1.2.2.1.7,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2,{#IFTYPE},1.3.6.1.2.1.2.2.1.3]'
+          key: interfaces.discovery
+          delay: 3m
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+                formulaid: A
+              - macro: '{#IFADMINSTATUS}'
+                value: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.MATCHES}'
+                formulaid: C
+              - macro: '{#IFALIAS}'
+                value: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#IFDESCR}'
+                value: '{$NET.IF.IFDESCR.MATCHES}'
+                formulaid: E
+              - macro: '{#IFDESCR}'
+                value: '{$NET.IF.IFDESCR.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: F
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: G
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                formulaid: H
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+                formulaid: I
+              - macro: '{#IFOPERSTATUS}'
+                value: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+                formulaid: J
+              - macro: '{#IFTYPE}'
+                value: '{$NET.IF.IFTYPE.MATCHES}'
+                formulaid: K
+              - macro: '{#IFTYPE}'
+                value: '{$NET.IF.IFTYPE.NOT_MATCHES}'
+                formulaid: L
+          item_prototypes:
+            - uuid: 51500697efa540c2b3009fa67d496489
+              name: 'Interface {#IFNAME} ({#IFALIAS}): IN packets DISCARDED'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}'
+              key: 'net.if.in.discards[ifInDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: d58d9787b74c402594df8818f03807f4
+              name: 'Interface {#IFNAME} ({#IFALIAS}): IN packets WITH ERRORS'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}'
+              key: 'net.if.in.errors[ifInErrors.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: c99f9eb14fbf4817a89b46b22a2edff7
+              name: 'Interface {#IFNAME} ({#IFALIAS}): RX'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}'
+              key: 'net.if.in[ifHCInOctets.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: 82e86fd844fc4ec885b2ff6d1222d6e3
+              name: 'Interface {#IFNAME} ({#IFALIAS}): OUT packets DISCARDED'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}'
+              key: 'net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: ab8e4172007f48418d9e0640f1e8504d
+              name: 'Interface {#IFNAME} ({#IFALIAS}): OUT with ERRORS'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}'
+              key: 'net.if.out.errors[ifOutErrors.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: c3818454aff74d86846aad30fd49168d
+              name: 'Interface {#IFNAME} ({#IFALIAS}): TX'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}'
+              key: 'net.if.out[ifHCOutOctets.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: 852b13d4ab354948b7c93a0dbdd3f573
+              name: 'Interface {#IFNAME} ({#IFALIAS}): SPEED'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}'
+              key: 'net.if.speed[ifHighSpeed.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              units: bps
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+            - uuid: 8257547503814862b67c98dd31de826e
+              name: 'Interface {#IFNAME} ({#IFALIAS}): STATUS'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+              key: 'net.if.status[ifOperStatus.{#SNMPINDEX}]'
+              delay: 3m
+              history: 7d
+              trends: 30d
+              valuemap:
+                name: op.stat
+              tags:
+                - tag: component
+                  value: 'description: {#IFALIAS}'
+                - tag: component
+                  value: 'interface: {#IFNAME}'
+                - tag: component
+                  value: network
+              trigger_prototypes:
+                - uuid: d2f664cb31a04916a5c4138e661ae72e
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Ruijie S6120 in VSU mode/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/Ruijie S6120 in VSU mode/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/Ruijie S6120 in VSU mode/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Ruijie S6120 in VSU mode/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  name: 'Interface {#IFNAME}({#IFALIAS}): Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+          trigger_prototypes:
+            - uuid: 0bfcb2403b424ecf86c70129608ba2e3
+              expression: |
+                (avg(/Ruijie S6120 in VSU mode/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Ruijie S6120 in VSU mode/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or
+                avg(/Ruijie S6120 in VSU mode/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Ruijie S6120 in VSU mode/net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and
+                last(/Ruijie S6120 in VSU mode/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Ruijie S6120 in VSU mode/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Ruijie S6120 in VSU mode/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) and
+                avg(/Ruijie S6120 in VSU mode/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Ruijie S6120 in VSU mode/net.if.speed[ifHighSpeed.{#SNMPINDEX}])
+              name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage'
+              event_name: 'Interface {#IFNAME}({#IFALIAS}): High bandwidth usage (>{$IF.UTIL.MAX:"{#IFNAME}"}%)'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              manual_close: 'YES'
+            - uuid: 15657c1e4b994a8aa0cf460bf3414cd1
+              expression: |
+                min(/Ruijie S6120 in VSU mode/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Ruijie S6120 in VSU mode/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Ruijie S6120 in VSU mode/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Ruijie S6120 in VSU mode/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}({#IFALIAS}): High error rate'
+              event_name: 'Interface {#IFNAME}({#IFALIAS}): High error rate (>{$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              manual_close: 'YES'
+      macros:
+        - macro: '{$ICMP_LOSS_WARN}'
+          value: '20'
+        - macro: '{$ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+        - macro: '{$IF.ERRORS.WARN}'
+          value: '2'
+        - macro: '{$IF.UTIL.MAX}'
+          value: '90'
+        - macro: '{$IFCONTROL}'
+          value: '1'
+        - macro: '{$NET.IF.IFADMINSTATUS.MATCHES}'
+          value: '^.*'
+        - macro: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+          value: ^2$
+        - macro: '{$NET.IF.IFALIAS.MATCHES}'
+          value: '.*'
+        - macro: '{$NET.IF.IFALIAS.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFDESCR.MATCHES}'
+          value: '.*'
+        - macro: '{$NET.IF.IFDESCR.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: '(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$|^veth[0-9a-z]+$|docker[0-9]+|br-[a-z0-9]{12})'
+        - macro: '{$NET.IF.IFOPERSTATUS.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFOPERSTATUS.NOT_MATCHES}'
+          value: ^6$
+        - macro: '{$NET.IF.IFTYPE.MATCHES}'
+          value: '.*'
+        - macro: '{$NET.IF.IFTYPE.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+      valuemaps:
+        - uuid: 6c2ecb5605b1456bb456ad6c1ea52903
+          name: op.stat
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+        - uuid: 1e31397fb2014a859ce80fcb22c275fc
+          name: Service
+          mappings:
+            - value: '1'
+              newvalue: UP
+            - value: '0'
+              newvalue: DOWN
+  graphs:
+    - uuid: 151c52c0617e47d39c62cbde6ccae517
+      name: Temperature
+      graph_items:
+        - color: 199C0D
+          calc_fnc: ALL
+          item:
+            host: 'Ruijie S6120 in VSU mode'
+            key: sw.temp.master
+        - sortorder: '1'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'Ruijie S6120 in VSU mode'
+            key: sw.temp.slave
